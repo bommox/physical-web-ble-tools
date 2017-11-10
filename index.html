@@ -87,7 +87,8 @@
             reqService
                 .then(service => service.getCharacteristic('b9403021-f5f8-466e-aff9-25556b57fe6d'))
                 .then(c => c.readValue())
-                .then(value => log(`Value uint8 : "${value.getUint8()}"`, value))
+                .then(dv => dv.getUint8())
+                .then(value => log(`Value uint8 : "${value}"`, value))
                 .then(fartemp =>  Math.round((fartemp-32) * 5 / 9))
                 .then(val => log(`${val}ºC`, val))
                 .then(val => $('#temp').text(val))
