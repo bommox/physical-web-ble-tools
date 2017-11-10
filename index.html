@@ -60,7 +60,7 @@
             options.optionalServices = [
                 0x1800,
                 'heart_rate',
-                'b9403000-f5f8-466e-aff9-25556b57fe6d'
+                SERVICE_ESTIMOTE_SERVICES
             ]
 
             var reqDevice = navigator.bluetooth.requestDevice(options)
@@ -86,7 +86,7 @@
             reqService
                 .then(service => service.getCharacteristic('b9403021-f5f8-466e-aff9-25556b57fe6d'))
                 .then(c => c.readValue())
-                .then(value => log(`Value : "${value}"`))
+                .then(value => log(`Value : "${value.getUint8()}"`))
 
             
                 //.then()
