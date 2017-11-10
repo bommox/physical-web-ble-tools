@@ -20,7 +20,7 @@
     <div class="container">
         <h1>Welcome to the Physical Web!</h1>
 
-        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos ()</button>
+        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos (!filter)</button>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -43,7 +43,7 @@
 
         function onButtonClick(filterService) {
             var options = (filterService == undefined) 
-                ? { /*acceptAllDevices : true*/ }
+                ? { acceptAllDevices : true }
                 : { filters: [{ services: [filterService] }] }
 
             options.optionalServices = [
@@ -61,10 +61,9 @@
             reqDevice
                 .then(device => device.gatt.connect())
                 .then(_ => log("Connected!", _))
-                .then(server => server.getPrimaryServices())
-                .then(services => {
-                    services.forEach(service => log(` >>(${service.isPrimary}) ${service.uuid}`))
-                })
+                .then(server => server.getPrimaryService('1800'))
+                .then(_ => log("Got service!", _))
+                .then(service => log(` >>(${service.isPrimary}) ${service.uuid}`))
                 .catch(e => log("Error : " + e))
         }
     </script>
