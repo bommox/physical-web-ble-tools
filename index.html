@@ -86,8 +86,11 @@
             reqService
                 .then(service => service.getCharacteristic('b9403021-f5f8-466e-aff9-25556b57fe6d'))
                 .then(c => c.readValue())
-                .then(value => log(`Value : "${value.getUint8()}"`))
-
+                .then(value => log(`Value uint8 : "${value.getUint8()}"`, value))
+                .then(value => log(`Value int8 : "${value.getInt8()}"`, value))
+                .then(value => log(`Value uint16 : "${value.getUint16()}"`, value))
+                .then(value => log(`Value int16 : "${value.getInt16()}"`, value))
+                .then(value => log(`Value float32 : "${value.getFloat32()}"`, value))
             
                 //.then()
                 //.then(cs => cs[0].service.device.gatt.disconnect())
