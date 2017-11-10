@@ -46,6 +46,13 @@
                 ? { acceptAllDevices : true }
                 : { filters: [{ services: [filterService] }] }
 
+            options.optionalServices = [
+                '1800',
+                '1801',
+                'heart_rate',
+                '180D'
+            ]
+
             var reqDevice = navigator.bluetooth.requestDevice(options)
             
             reqDevice.catch(error => log('Argh! ' + error))
