@@ -22,6 +22,7 @@
 
         <button class="btn btn-primary" onclick="onButtonClick('b9403000-f5f8-466e-aff9-25556b57fe6d')">Estimotes!</button>
         <button class="btn btn-primary" onclick="onButtonClick()">All</button>
+      <h2>Temp: <span id="temp">0</span>ºC</h2>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -87,10 +88,9 @@
                 .then(service => service.getCharacteristic('b9403021-f5f8-466e-aff9-25556b57fe6d'))
                 .then(c => c.readValue())
                 .then(value => log(`Value uint8 : "${value.getUint8()}"`, value))
-                .then(value => log(`Value int8 : "${value.getInt8()}"`, value))
-                .then(value => log(`Value uint16 : "${value.getUint16()}"`, value))
-                .then(value => log(`Value int16 : "${value.getInt16()}"`, value))
-                .then(value => log(`Value float32 : "${value.getFloat32()}"`, value))
+                .then(fartemp =>  Math.round((fartemp-32) * 5 / 9)
+                .then(val => log(`${val}ºC`, val)
+                .then(val => $('#temp').text(val))
             
                 //.then()
                 //.then(cs => cs[0].service.device.gatt.disconnect())
