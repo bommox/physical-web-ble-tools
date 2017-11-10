@@ -30,9 +30,10 @@
     </div>
 
     <script>
-        var log = msg => {
+        var log = (msg,returnValue) => {
             $(".console pre").append(`${msg}\n`)
             console.log(msg)
+            return returnValue
         }
 
         if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
@@ -52,6 +53,7 @@
             
             reqDevice
                 .then(device => device.gatt.connect())
+                .then(_ => log("Connected!", _))
                 .then(server => server.getPrimaryServices())
                 .then(services => {
                     services.forEach(service => log(` >>(${service.isPrimary}) ${service.uuid}`))
