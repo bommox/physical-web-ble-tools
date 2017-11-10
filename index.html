@@ -31,28 +31,32 @@
 
     <script>
         var log = msg => {
-            $(".console pre").append(`${msg}`)
+            $(".console pre").append(`${msg}\n`)
             console.log(msg)
         }
 
         if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
             log("Error, no bluetooth support available... :(")
         }
-
+        
 
         function onButtonClick(filterService) {
             var options = (filterService) 
                 ? { acceptAllDevices : true }
                 : { filters: [{ services: [filterService] }] }
-            if (filterService) {
-                
-            }
-            navigator.bluetooth.requestDevice(options)
-            .then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
-            .then(aaa => log("OTRO -> " + aaa))
-            .catch(error => {
-                log('Argh! ' + error);
-            });
+
+            var reqDevice = navigator.bluetooth.requestDevice(options)
+            
+            reqDevice.catch(error => log('Argh! ' + error))
+            reqDevice.then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
+            
+            reqDevice
+                .then(device => device.gatt.connect())
+                .then(server => server.getPrimaryServices())
+                .then(services => {
+                    services.forEach(service => log(` >>(${service.isPrimary}) ${service.uuid}`))
+                })
+                .catch(e => log("Error : " + e))
         }
     </script>
 
