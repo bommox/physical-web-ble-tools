@@ -20,7 +20,7 @@
     <div class="container">
         <h1>Welcome to the Physical Web!</h1>
 
-        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos (!filter)</button>
+        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos ()</button>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -43,7 +43,7 @@
 
         function onButtonClick(filterService) {
             var options = (filterService == undefined) 
-                ? { acceptAllDevices : true }
+                ? { /*acceptAllDevices : true*/ }
                 : { filters: [{ services: [filterService] }] }
 
             options.optionalServices = [
