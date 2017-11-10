@@ -21,6 +21,7 @@
         <h1>Welcome to the Physical Web!</h1>
 
         <button class="btn btn-primary" onclick="onButtonClick('b9403000-f5f8-466e-aff9-25556b57fe6d')">Estimotes!</button>
+        <button class="btn btn-primary" onclick="onButtonClick()">All</button>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -58,7 +59,8 @@
 
             options.optionalServices = [
                 0x1800,
-                'heart_rate'
+                'heart_rate',
+                'b9403000-f5f8-466e-aff9-25556b57fe6d'
             ]
 
             var reqDevice = navigator.bluetooth.requestDevice(options)
