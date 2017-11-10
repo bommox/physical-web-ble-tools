@@ -17,33 +17,39 @@
     </style>
   </head>
   <body>
-    <h1>Welcome to the Physical Web!</h1>
+    <div class="container">
+        <h1>Welcome to the Physical Web!</h1>
 
-    <button class="btn btn-primary" onclick="onButtonClick()">Buscar dispositivos</button>
+        <button class="btn btn-primary" onclick="onButtonClick('heart_rate')">Buscar dispositivos</button>
 
-    <ul class="list-group">
-        <!--<li class="list-group-item">Cras justo odio</li>-->
-    </ul>
+        <ul class="list-group">
+            <!--<li class="list-group-item">Cras justo odio</li>-->
+        </ul>
 
-    <div class="console"></div>
+        <div class="console"><pre></pre></div>
+    </div>
 
     <script>
         var log = msg => {
-            $(".console").append(`<pre>${msg}</pre>`)
+            $(".console pre").append(`${msg}`)
             console.log(msg)
         }
 
+        if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+            log("Error, no bluetooth support available... :(")
+        }
 
 
-        function onButtonClick() {
-            navigator.bluetooth.requestDevice({
-                acceptAllDevices : true
-            })
-            .then(device => {
-                log('> Name:             ' + device.name);
-                log('> Id:               ' + device.id);
-                log('> Connected:        ' + device.gatt.connected);
-            })
+        function onButtonClick(filterService) {
+            var options = (filterService) 
+                ? { acceptAllDevices : true }
+                : { filters: [{ services: [filterService] }] }
+            if (filterService) {
+                
+            }
+            navigator.bluetooth.requestDevice(options)
+            .then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
+            .then(aaa => log("OTRO -> " + aaa))
             .catch(error => {
                 log('Argh! ' + error);
             });
