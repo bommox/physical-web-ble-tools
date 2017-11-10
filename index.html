@@ -20,7 +20,7 @@
     <div class="container">
         <h1>Welcome to the Physical Web!</h1>
 
-        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos (!filter)</button>
+        <button class="btn btn-primary" onclick="onButtonClick(x)">Dispositivos (!filter)</button>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -47,10 +47,8 @@
                 : { filters: [{ services: [filterService] }] }
 
             options.optionalServices = [
-                '1800',
-                '1801',
-                'heart_rate',
-                '180D'
+                0x1800,
+                'heart_rate'
             ]
 
             var reqDevice = navigator.bluetooth.requestDevice(options)
