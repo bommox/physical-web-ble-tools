@@ -20,7 +20,7 @@
     <div class="container">
         <h1>Welcome to the Physical Web!</h1>
 
-        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos (x)</button>
+        <button class="btn btn-primary" onclick="onButtonClick()">Dispositivos ()</button>
 
         <ul class="list-group">
             <!--<li class="list-group-item">Cras justo odio</li>-->
@@ -59,7 +59,7 @@
             reqDevice
                 .then(device => device.gatt.connect())
                 .then(_ => log("Connected!", _))
-                .then(server => server.getPrimaryService('1800'))
+                .then(server => server.getPrimaryService(0x1800))
                 .then(_ => log("Got service!", _))
                 .then(service => log(` >>(${service.isPrimary}) ${service.uuid}`))
                 .catch(e => log("Error : " + e))
