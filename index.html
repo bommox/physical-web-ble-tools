@@ -29,7 +29,7 @@
   <body>
     <div class="container">
 
-        <h1>Smart Light BLE</h1>
+        <h1>Smart Light BLE Sample</h1>
         <hr>
 
         <button class="btn btn-primary" id="connect">Connect!</button>
@@ -126,15 +126,20 @@
         $app.on('charready', _ => {
             $txtStatus.text("Light ready :)")
             $colorInput.show()
-        })
+        })  
 
         $colorInput.on("change", function(e, data) {
             var lightC = $app.data(DATA_LIGHT_CHAR)
             log(`Writing data to char ${lightC.uuid}`)
             if (lightC && lightC.writeValue) {
+                try {
+
                 var v = new Uint8Array([data.b, data.g, dara.r, data.w])
                 log(" >> writeValue " + v.buffer)
                 lightC.writeValue(v)
+                } catch (e) {
+                    log("Error : " + e)
+                }
             } else {
                 log("Error!")
             }
