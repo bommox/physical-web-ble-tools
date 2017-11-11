@@ -127,7 +127,9 @@
         $colorInput.on("change", function(e, data) {
             var lightC = $app.data(DATA_LIGHT_CHAR)
             if (lightC && lightC.writeValue) {
-                lightC.writeValue(new Uint8Array([data.b, data.g, dara.r, data.w]))
+                var v = new Uint8Array([data.b, data.g, dara.r, data.w])
+                log(" >> writeValue " + v.buffer)
+                lightC.writeValue(v)
             } else {
                 log("Error!")
             }
