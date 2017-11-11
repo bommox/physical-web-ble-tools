@@ -130,6 +130,7 @@
 
         $colorInput.on("change", function(e, data) {
             var lightC = $app.data(DATA_LIGHT_CHAR)
+            log(`Writing data to char ${lightC.uuid}`)
             if (lightC && lightC.writeValue) {
                 var v = new Uint8Array([data.b, data.g, dara.r, data.w])
                 log(" >> writeValue " + v.buffer)
@@ -141,8 +142,10 @@
         })
 
         $btnDisconnect.click(_ => {
+            log("Trying to disconnect")
             var lightC = $app.data(DATA_LIGHT_CHAR)
             if (lightC && lightC.service && lightC.service.device) {
+                log(`Disconnecting... ${lightC.service.device.uuid}`)
                 lightC.service.device.gatt.disconnect()
                     .then(_ => $app.trigger('disconnected'))
                     .then(_ => log("Disconnected"))
@@ -175,6 +178,7 @@
                 .then(service => service.getCharacteristic(IEGEEL_LUZ))
                 .then(c => {
                     $app.data(DATA_LIGHT_CHAR, c)
+                    log(`Characteristic ready ${c.uuid}` )
                     $app.trigger('charready')
                     return c
                 })
