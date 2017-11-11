@@ -21,6 +21,7 @@
         <h1>Welcome to the Physical Web!</h1>
 
         <button class="btn btn-primary" onclick="onButtonClick('b9403000-f5f8-466e-aff9-25556b57fe6d')">Estimotes!</button>
+        <button class="btn btn-primary" onclick="onButtonClick('0000ffb0-0000-1000-8000-00805f9b34fb')">Luz</button>
         <button class="btn btn-primary" onclick="onButtonClick()">All</button>
       <h2>Temp: <span id="temp">0</span>ºC</h2>
 
@@ -52,16 +53,22 @@
             'b9403041-f5f8-466e-aff9-25556b57fe6d' : 'battery'
         }
         
+        var IEGEEK_SVC = '0000ffb0-0000-1000-8000-00805f9b34fb'
+        var IEGEEL_LUZ = '0000ffb2-0000-1000-8000-00805f9b34fb'
+        
+        
+        
 
         function onButtonClick(filterService) {
             var options = (filterService == undefined) 
                 ? { acceptAllDevices : true }
-                : { filters: [{ services: [SERVICE_ESTIMOTE_SERVICES] }] }
+                : { filters: [{ services: [filterService] }] }
 
             options.optionalServices = [
                 0x1800,
                 'heart_rate',
-                SERVICE_ESTIMOTE_SERVICES
+                SERVICE_ESTIMOTE_SERVICES,
+                IEGEEK_SVC
             ]
 
             var reqDevice = navigator.bluetooth.requestDevice(options)
@@ -72,7 +79,7 @@
             var reqService = reqDevice
                 .then(device => device.gatt.connect())
                 .then(_ => log("Connected!", _))
-                .then(server => server.getPrimaryService(SERVICE_ESTIMOTE_SERVICES))
+                .then(server => server.getPrimaryService(IEGEEK_SVC))
 
             //Debug all characteristics
             reqService.then(_ => log("Got service!", _))
@@ -85,7 +92,9 @@
                 })
 
             reqService
-                .then(service => service.getCharacteristic('b9403021-f5f8-466e-aff9-25556b57fe6d'))
+                .then(service => service.getCharacteristic(IEGEEL_LUZ))
+                .then(c => c.writeValue(new Uint8Array([0,255,0,0])))
+          /*
                 .then(c => c.readValue())
                 .then(dv => dv.getUint8())
                 .then(value => log(`Value uint8 : "${value}"`, value))
@@ -93,6 +102,8 @@
                 .then(val => log(`${val}ºC`, val))
                 .then(val => $('#temp').text(val))
             
+            
+           */
                 //.then()
                 //.then(cs => cs[0].service.device.gatt.disconnect())
                 //.then(_ => log("Disconeccted!"))
