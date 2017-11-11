@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <title>Bommox Physical Web</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <style>
+        .console {
+            background-color: #bbb;
+            border: 1px solid grey;
+            border-radius: 2px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <h1>Welcome to the Physical Web!</h1>
+
+        <button class="btn btn-primary" onclick="onButtonClick('b9403000-f5f8-466e-aff9-25556b57fe6d')">Estimotes!</button>
+        <button class="btn btn-primary" onclick="onButtonClick('0000ffb0-0000-1000-8000-00805f9b34fb')">Luz</button>
+        <button class="btn btn-primary" onclick="onButtonClick()">All</button>
+      <h2>Temp: <span id="temp">0</span>ºC</h2>
+
+        <ul class="list-group">
+            <!--<li class="list-group-item">Cras justo odio</li>-->
+        </ul>
+
+        <div class="console"><pre></pre></div>
+    </div>
+
+    <script>
+        var log = (msg,returnValue) => {
+            $(".console pre").append(`${msg}\n`)
+            console.log(msg)
+            return returnValue
+        }
+
+        if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
+            log("Error, no bluetooth support available... :(")
+        }
+
+        var SERVICE_ESTIMOTE_SERVICES = 'b9403000-f5f8-466e-aff9-25556b57fe6d'
+        var ESTIMOTE_SERVICES_CS = {
+            'b9403001-f5f8-466e-aff9-25556b57fe6d' : 'estimote_major',
+            'b9403002-f5f8-466e-aff9-25556b57fe6d' : 'estimote_minor',
+            'b9403003-f5f8-466e-aff9-25556b57fe6d' : 'estimote_uuid',
+            'b9403011-f5f8-466e-aff9-25556b57fe6d' : 'estimote_power',
+            'b9403021-f5f8-466e-aff9-25556b57fe6d' : 'temperature',
+            'b9403041-f5f8-466e-aff9-25556b57fe6d' : 'battery'
+        }
+        
+        var IEGEEK_SVC = '0000ffb0-0000-1000-8000-00805f9b34fb'
+        var IEGEEL_LUZ = '0000ffb2-0000-1000-8000-00805f9b34fb'
+        
+        
+        
+
+        function onButtonClick(filterService) {
+            var options = (filterService == undefined) 
+                ? { acceptAllDevices : true }
+                : { filters: [{ services: [filterService] }] }
+
+            options.optionalServices = [
+                0x1800,
+                'heart_rate',
+                SERVICE_ESTIMOTE_SERVICES,
+                IEGEEK_SVC
+            ]
+
+            var reqDevice = navigator.bluetooth.requestDevice(options)
+            
+            reqDevice.catch(error => log('Argh! ' + error))
+            reqDevice.then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
+            
+            var reqService = reqDevice
+                .then(device => device.gatt.connect())
+                .then(_ => log("Connected!", _))
+                .then(server => server.getPrimaryService(IEGEEK_SVC))
+
+            //Debug all characteristics
+            reqService.then(_ => log("Got service!", _))
+                .then(service => log(` >>(${service.isPrimary}) ${service.uuid}`, service))
+                .then(service => service.getCharacteristics())
+                .then(_ => log(">Characteristics:", _))
+                .then(characteristics => { 
+                    characteristics.forEach(c => log(`${ESTIMOTE_SERVICES_CS[c.uuid] || c.uuid}`))
+                     return characteristics
+                })
+
+            reqService
+                .then(service => service.getCharacteristic(IEGEEL_LUZ))
+                .then(c => c.writeValue(new Uint8Array([0,255,0,0])))
+          /*
+                .then(c => c.readValue())
+                .then(dv => dv.getUint8())
+                .then(value => log(`Value uint8 : "${value}"`, value))
+                .then(fartemp =>  Math.round((fartemp-32) * 5 / 9))
+                .then(val => log(`${val}ºC`, val))
+                .then(val => $('#temp').text(val))
+            
+            
+           */
+                //.then()
+                //.then(cs => cs[0].service.device.gatt.disconnect())
+                //.then(_ => log("Disconeccted!"))
+
+                .catch(e => log("Error : " + e))
+        }
+    </script>
+
+    <!-- jQuery first, then Tether, then Bootstrap JS. -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  </body>
+</html>

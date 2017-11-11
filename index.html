@@ -14,24 +14,43 @@
             border: 1px solid grey;
             border-radius: 2px;
         }
+        .slider {
+            display: box;
+            height: 40px;
+            border: 1px solid #ddd;
+            margin-top: 15px;
+        }
+        .slider div {
+            height: 100%;
+            display: inline-block;
+        }
     </style>
   </head>
   <body>
     <div class="container">
-        <h1>Welcome to the Physical Web!</h1>
 
-        <button class="btn btn-primary" onclick="onButtonClick('b9403000-f5f8-466e-aff9-25556b57fe6d')">Estimotes!</button>
-        <button class="btn btn-primary" onclick="onButtonClick('0000ffb0-0000-1000-8000-00805f9b34fb')">Luz</button>
-        <button class="btn btn-primary" onclick="onButtonClick()">All</button>
-      <h2>Temp: <span id="temp">0</span>ºC</h2>
+        <h1>Smart Light BLE Sample</h1>
+        <hr>
 
-        <ul class="list-group">
-            <!--<li class="list-group-item">Cras justo odio</li>-->
-        </ul>
-
+        <button class="btn btn-primary" id="connect">Connect!</button>
+        <button class="btn btn-danger" id="disconnect">Disconnect</button>
+        <span id="status">Not connected</span>
+        
+        <div id="colorInput">
+            <div class="slider"><div style="background-color:red; width: 5%;"></div></div>
+            <div class="slider"><div style="background-color:green; width: 5%;"></div></div>
+            <div class="slider"><div style="background-color:blue; width: 5%;"></div></div>
+            <div class="slider"><div style="background-color:#ccc; width: 5%;"></div></div>
+        </div>
+        
+        <hr>
+        <button class="btn">View console</button>
         <div class="console"><pre></pre></div>
     </div>
-
+    
+    
+    
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script>
         var log = (msg,returnValue) => {
             $(".console pre").append(`${msg}\n`)
@@ -43,77 +62,120 @@
             log("Error, no bluetooth support available... :(")
         }
 
-        var SERVICE_ESTIMOTE_SERVICES = 'b9403000-f5f8-466e-aff9-25556b57fe6d'
-        var ESTIMOTE_SERVICES_CS = {
-            'b9403001-f5f8-466e-aff9-25556b57fe6d' : 'estimote_major',
-            'b9403002-f5f8-466e-aff9-25556b57fe6d' : 'estimote_minor',
-            'b9403003-f5f8-466e-aff9-25556b57fe6d' : 'estimote_uuid',
-            'b9403011-f5f8-466e-aff9-25556b57fe6d' : 'estimote_power',
-            'b9403021-f5f8-466e-aff9-25556b57fe6d' : 'temperature',
-            'b9403041-f5f8-466e-aff9-25556b57fe6d' : 'battery'
-        }
-        
+        $(".slider").on('click', function(e) {
+            var newValue = e.offsetX * 100 / $(this).width()
+            console.log(newValue)
+            $(this).find("div").width(parseInt(newValue) + "%")
+            $("#colorInput").trigger("_change")
+        })
+
+        $("#colorInput").on("_change", function() {
+            var sliders = $(this).find(".slider")
+            var get255 = el =>Math.round($(el).find("div").width() * 255 / $(el).width())
+            var value = {
+                r: get255(sliders.get(0)),
+                g: get255(sliders.get(1)),
+                b: get255(sliders.get(2)),
+                w: get255(sliders.get(3))
+            }
+            $(this).trigger("change", value)
+        })
+
+        $("#colorInput").on("change", function(e, data) {
+            log(JSON.stringify(data))
+        })
+    </script>
+    <script>
+    
         var IEGEEK_SVC = '0000ffb0-0000-1000-8000-00805f9b34fb'
         var IEGEEL_LUZ = '0000ffb2-0000-1000-8000-00805f9b34fb'
-        
-        
-        
 
-        function onButtonClick(filterService) {
-            var options = (filterService == undefined) 
-                ? { acceptAllDevices : true }
-                : { filters: [{ services: [filterService] }] }
+        var DATA_LIGHT_CHAR = 'lightChar'
 
-            options.optionalServices = [
-                0x1800,
-                'heart_rate',
-                SERVICE_ESTIMOTE_SERVICES,
-                IEGEEK_SVC
-            ]
+        var $app = $(document.body)
+        var $btnConnect = $("#connect")
+        var $btnDisconnect = $("#disconnect").hide()
+        var $txtStatus = $("#status")
+        var $colorInput = $("#colorInput").hide()
+
+        $app.on('connected', _ => {
+            $btnConnect.hide()
+            $btnDisconnect.show()
+            $btnConnect.attr('disabled', null)
+            $txtStatus.text("Connected!")
+        }) 
+        
+        $app.on('connecting', _ => {
+            $btnConnect.attr('disabled')
+            $txtStatus.text("Connecting...")
+        })
+
+        
+        $app.on('disconnected', _ => {
+            $btnConnect.hide()
+            $btnDisconnect.show()
+            $btnConnect.attr('disabled', null)
+            $txtStatus.text("Not connected")
+            $colorInput.hide()
+        })
+
+        $app.on('charready', _ => {
+            $txtStatus.text("Light ready :)")
+            $colorInput.show()
+        })
+
+        $colorInput.on("change", function(e, data) {
+            var lightC = $app.data(DATA_LIGHT_CHAR)
+            if (lightC && lightC.writeValue) {
+                lightC.writeValue(new Uint8Array([data.b, data.g, dara.r, data.w]))
+            } else {
+                log("Error!")
+            }
+
+        })
+
+        $btnDisconnect.click(_ => {
+            var lightC = $app.data(DATA_LIGHT_CHAR)
+            if (lightC && lightC.service && lightC.service.device) {
+                lightC.service.device.gatt.disconnect()
+                    .then(_ => $app.trigger('disconnected'))
+                    .then(_ => log("Disconnected"))
+            }
+        })
+        
+        $btnConnect.click(_ => {
+            var options =  { 
+                acceptAllDevices : true,
+                optionalServices : [
+                    IEGEEK_SVC
+                ]
+            }
+
+            $app.trigger('connecting')
 
             var reqDevice = navigator.bluetooth.requestDevice(options)
+
+            reqDevice
+                .then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
+                .catch(error => log('Argh! ' + error))
             
-            reqDevice.catch(error => log('Argh! ' + error))
-            reqDevice.then(device => log(`> Name: ${device.name}\n> Id:    ${device.id}\n> Connected: ${device.gatt.connected}`))
-            
-            var reqService = reqDevice
+            var reqConnection = reqDevice
                 .then(device => device.gatt.connect())
+                .then(_ => { $app.trigger('connected'); return _;})
                 .then(_ => log("Connected!", _))
                 .then(server => server.getPrimaryService(IEGEEK_SVC))
-
-            //Debug all characteristics
-            reqService.then(_ => log("Got service!", _))
-                .then(service => log(` >>(${service.isPrimary}) ${service.uuid}`, service))
-                .then(service => service.getCharacteristics())
-                .then(_ => log(">Characteristics:", _))
-                .then(characteristics => { 
-                    characteristics.forEach(c => log(`${ESTIMOTE_SERVICES_CS[c.uuid] || c.uuid}`))
-                     return characteristics
-                })
-
-            reqService
                 .then(service => service.getCharacteristic(IEGEEL_LUZ))
-                .then(c => c.writeValue(new Uint8Array([0,255,0,0])))
-          /*
-                .then(c => c.readValue())
-                .then(dv => dv.getUint8())
-                .then(value => log(`Value uint8 : "${value}"`, value))
-                .then(fartemp =>  Math.round((fartemp-32) * 5 / 9))
-                .then(val => log(`${val}ºC`, val))
-                .then(val => $('#temp').text(val))
-            
-            
-           */
-                //.then()
-                //.then(cs => cs[0].service.device.gatt.disconnect())
-                //.then(_ => log("Disconeccted!"))
+                .then(c => {
+                    $app.data(DATA_LIGHT_CHAR, c)
+                    $app.trigger('charready')
+                    return c
+                })
+        })
 
-                .catch(e => log("Error : " + e))
-        }
     </script>
 
+
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   </body>
