@@ -29,7 +29,7 @@
   <body>
     <div class="container">
 
-        <h1>Smart Light BLE Sample</h1>
+        <h1>Smart Light BLE</h1>
         <hr>
 
         <button class="btn btn-primary" id="connect">Connect!</button>
@@ -44,7 +44,7 @@
         </div>
         
         <hr>
-        <button class="btn">View console</button>
+        <button class="btn" id="btnConsole">View console</button>
         <div class="console"><pre></pre></div>
     </div>
     
@@ -57,6 +57,10 @@
             console.log(msg)
             return returnValue
         }
+
+        $(".console").hide()
+        $("#btnConsole").click(_ => $(".console").toggle())
+
 
         if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
             log("Error, no bluetooth support available... :(")
@@ -142,6 +146,8 @@
                 lightC.service.device.gatt.disconnect()
                     .then(_ => $app.trigger('disconnected'))
                     .then(_ => log("Disconnected"))
+            } else {
+                log("Error disconnecting")
             }
         })
         
